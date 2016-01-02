@@ -49,10 +49,18 @@ angular.module('WMJS', ['ngMaterial'])
 				var img = new Image();
 				img.onload = function () {
 					var viewportWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+					var viewportHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 					var canvas = self.original;
 					var context = canvas.getContext('2d');
-					var width = (viewportWidth * 0.3);
-					var height = width * img.height / img.width;
+					var width = 0;
+					var height = 0;
+					if (img.width > img.height) {
+						width = viewportWidth * 0.3;
+						height = width * img.height / img.width;
+					} else {
+						height = viewportHeight * 0.5;
+						width = height * img.width / img.height;
+					}
 					self.canvases.forEach(function (c) {
 						c.width = img.width;
 						c.height = img.height;
@@ -77,11 +85,11 @@ angular.module('WMJS', ['ngMaterial'])
 			
 			var measure = context.measureText(text);
 			var width = measure.width;
-			var size = canvas.height/3;
+			var size = Math.min(canvas.height, canvas.width) / 3;
 			
 			context.font = 'bold ' + size + 'px sans-serif';
 			
-			context.fillText(text, canvas.width/2 - width/2, canvas.height/2);
+			context.fillText(text, canvas.width / 2 - width / 2, canvas.height / 2);
 			
 			var watermark = context.getImageData(0, 0, canvas.width, canvas.height).data;
 			
