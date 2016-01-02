@@ -1,0 +1,25 @@
+{
+  "name": "wmjs",
+  "authors": [
+    "Shuyang Chen <sc1085@gmail.com>"
+  ],
+  "description": "",
+  "main": "index.html",
+  "moduleType": [],
+  "license": "MIT",
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+	"lib"
+  ],
+  "dependencies": {
+    "angular": "~1.4.8",
+    "angular-material": "~1.0.1",
+    "angular-messages": "~1.4.8"
+  }
+}

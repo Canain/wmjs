@@ -1,0 +1,149 @@
+<html lang="en">
+<head>
+<link rel="stylesheet" href="lib/angular-material/angular-material.css">
+<script src="lib/angular/angular.js"></script>
+<script src="lib/angular-animate/angular-animate.js"></script>
+<script src="lib/angular-aria/angular-aria.js"></script>
+<script src="lib/angular-messages/angular-messages.js"></script>
+<script src="lib/angular-material/angular-material.js"></script>
+<style>
+</style>
+<script>
+'use strict';
+
+function download(filename, text) {
+    var pom = document.createElement('a');
+    pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    pom.setAttribute('download', filename);
+
+    if (document.createEvent) {
+        var event = document.createEvent('MouseEvents');
+        event.initEvent('click', true, true);
+        pom.dispatchEvent(event);
+    }
+    else {
+        pom.click();
+    }
+}
+
+angular.module('WMJS', ['ngMaterial'])
+.controller('WMJSCtrl', [
+	function () {
+		var self = this;
+		
+		self.text = '';
+		self.lighten = 1;
+		
+		self.original = document.getElementById('wm-original');
+		self.watermark = document.getElementById('wm-watermark');
+		self.processed = document.getElementById('wm-processed');
+		
+		self.file = document.getElementById('wm-file');
+		self.download = document.getElementById('wm-download');
+		
+		self.canvases = [self.original, self.watermark, self.processed];
+		
+		self.file.onchange = function (e) {
+			var reader = new FileReader();
+			reader.onload = function (event) {
+				var img = new Image();
+				img.onload = function () {
+					var viewportWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+					var canvas = self.original;
+					var context = canvas.getContext('2d');
+					var width = (viewportWidth * 0.3);
+					var height = width * img.height / img.width;
+					self.canvases.forEach(function (c) {
+						c.width = img.width;
+						c.height = img.height;
+						c.style.width = width + 'px';
+						c.style.height = height + 'px';
+					});
+					context.drawImage(img, 0, 0);
+				};
+				img.src = event.target.result;
+				self.update();
+			};
+			reader.readAsDataURL(e.target.files[0]);
+		};
+		
+		self.update = function () {
+			var text = self.text;
+			
+			var canvas = self.watermark;
+			var context = canvas.getContext('2d');
+			
+			context.clearRect(0, 0, canvas.width, canvas.height);
+			
+			var measure = context.measureText(text);
+			var width = measure.width;
+			var size = canvas.height/3;
+			
+			context.font = 'bold ' + size + 'px sans-serif';
+			
+			context.fillText(text, canvas.width/2 - width/2, canvas.height/2);
+			
+			var watermark = context.getImageData(0, 0, canvas.width, canvas.height).data;
+			
+			var original = self.original;
+			
+			canvas = self.processed;
+			context = canvas.getContext('2d');
+			
+			context.clearRect(0, 0, canvas.width, canvas.height);
+			
+			context.drawImage(original, 0, 0);
+			
+			var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+			var data = imageData.data;
+			
+			var increment = self.lighten;
+			
+			for (var i = 0; i < data.length; i += 4) {
+				var marked = watermark[i + 3];
+				if (marked) {
+					data[i] = Math.max(Math.min(data[i] + increment, 255), 0);
+					data[i + 1] = Math.max(Math.min(data[i + 1] + increment, 255), 0);
+					data[i + 2] = Math.max(Math.min(data[i + 2] + increment, 255), 0);
+				}
+			}
+			
+			context.putImageData(imageData, 0, 0);
+			
+			var path = self.file.value.split(/\/|\\/);
+			var name = path[path.length - 1];
+			var contents = canvas.toDataURL('image/png');
+			name = name.substring(0, name.indexOf('.'));
+			self.download.setAttribute('href', contents);
+			self.name = name + 'wm.png';
+		};
+	}
+]);
+</script>
+</head>
+<body ng-cloak ng-app="WMJS" ng-controller="WMJSCtrl as ctrl">
+<md-content>
+<div class="md-padding" layout="rom" layout-align="center start">
+	<div layout="column" layout-align="start center">
+		<canvas id="wm-original"></canvas>
+		<input id="wm-file" type="file">
+	</div>
+	<div layout="column" layout-align="start center">
+		<canvas id="wm-watermark"></canvas>
+		<md-input-container>
+			<label>Watermark</label>
+			<input ng-model="ctrl.text" ng-change="ctrl.update()">
+		</md-input-container>
+		<md-input-container>
+			<label>Level</label>
+			<input ng-model="ctrl.lighten" type="number" ng-change="ctrl.update()">
+		</md-input-container>
+	</div>
+	<div layout="column" layout-align="start center">
+		<canvas id="wm-processed"></canvas>
+		<md-button id="wm-download" class="md-raised md-primary" download="{{ctrl.name}}" ng-href="#">Download</md-button>
+	</div>
+</div>
+</md-content>
+</body>
+</html>
