@@ -7,6 +7,10 @@
 <script src="lib/angular-messages/angular-messages.js"></script>
 <script src="lib/angular-material/angular-material.js"></script>
 <style>
+canvas {
+	height: 50vh;
+	width: 30vw;
+}
 </style>
 <script>
 'use strict';
@@ -32,7 +36,7 @@ angular.module('WMJS', ['ngMaterial'])
 	function ($timeout) {
 		var self = this;
 		
-		self.text = '';
+		self.text = 'WMJS';
 		self.lighten = 1;
 		self.comparing = false;
 		self.threshold = 1;
@@ -72,14 +76,18 @@ angular.module('WMJS', ['ngMaterial'])
 						c.style.height = height + 'px';
 					});
 					context.drawImage(img, 0, 0);
+					self.update();
 				};
 				img.src = event.target.result;
-				self.update();
 			};
 			reader.readAsDataURL(e.target.files[0]);
 		};
 		
 		self.update = function () {
+			if (!self.file.value) {
+				return;
+			}
+			
 			var text = self.text;
 			
 			var canvas = self.watermark;
@@ -87,11 +95,11 @@ angular.module('WMJS', ['ngMaterial'])
 			
 			context.clearRect(0, 0, canvas.width, canvas.height);
 			
+			var size = Math.min(canvas.height, canvas.width) / 3;
+			context.font = 'bold ' + size + 'px sans-serif';
+			
 			var measure = context.measureText(text);
 			var width = measure.width;
-			var size = Math.min(canvas.height, canvas.width) / 3;
-			
-			context.font = 'bold ' + size + 'px sans-serif';
 			
 			context.fillText(text, canvas.width / 2 - width / 2, canvas.height / 2);
 			
@@ -120,6 +128,7 @@ angular.module('WMJS', ['ngMaterial'])
 				}
 			}
 			
+			context.clearRect(0, 0, canvas.width, canvas.height);
 			context.putImageData(imageData, 0, 0);
 			
 			var path = self.file.value.split(/\/|\\/);
@@ -164,6 +173,7 @@ angular.module('WMJS', ['ngMaterial'])
 				processed[i + 3] = difference ? 255 : 0;
 			}
 			
+			context.clearRect(0, 0, canvas.width, canvas.height);
 			context.putImageData(imageData, 0, 0);
 		};
 		
@@ -194,7 +204,18 @@ angular.module('WMJS', ['ngMaterial'])
 <div class="md-padding" layout="rom" layout-align="center start">
 	<div layout="column" layout-align="start center">
 		<canvas id="wm-original"></canvas>
-		<input id="wm-file" type="file">
+		<div layout="column" layout-align="start start">
+			<h3>Upload Original</h3>
+			<input id="wm-file" type="file">
+		</div>
+		<div layout="column" layout-align="start start">
+			<h3>Reverse Watermark</h3>
+			<md-input-container>
+				<label>Threshold</label>
+				<input ng-model="ctrl.threshold" type="number" ng-disabled="!ctrl.comparing" ng-change="ctrl.reverse()">
+			</md-input-container>
+			<input id="wm-compare" type="file">
+		</div>
 	</div>
 	<div layout="column" layout-align="start center">
 		<canvas id="wm-watermark"></canvas>
@@ -206,14 +227,9 @@ angular.module('WMJS', ['ngMaterial'])
 			<label>Level</label>
 			<input ng-model="ctrl.lighten" type="number" ng-disabled="ctrl.comparing" ng-change="ctrl.update()">
 		</md-input-container>
-		<md-input-container>
-			<label>Level</label>
-			<input ng-model="ctrl.threshold" type="number" ng-disabled="!ctrl.comparing" ng-change="ctrl.reverse()">
-		</md-input-container>
 	</div>
 	<div layout="column" layout-align="start center">
 		<canvas id="wm-processed"></canvas>
-		<input id="wm-compare" type="file">
 		<md-button id="wm-download" class="md-raised md-primary" ng-disabled="ctrl.comparing" download="{{ctrl.name}}" ng-href="#">Download</md-button>
 	</div>
 </div>
