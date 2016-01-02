@@ -40,6 +40,7 @@ angular.module('WMJS', ['ngMaterial'])
 		self.lighten = 1;
 		self.comparing = false;
 		self.threshold = 1;
+		self.randomness = 10;
 		
 		self.original = document.getElementById('wm-original');
 		self.watermark = document.getElementById('wm-watermark');
@@ -101,7 +102,13 @@ angular.module('WMJS', ['ngMaterial'])
 			var measure = context.measureText(text);
 			var width = measure.width;
 			
-			context.fillText(text, canvas.width / 2 - width / 2, canvas.height / 2);
+			var x = canvas.width / 2 - width / 2;
+			var y = canvas.height / 2
+			
+			x += self.randomness / 2 - Math.random() * self.randomness;
+			y += self.randomness / 2 - Math.random() * self.randomness;
+			
+			context.fillText(text, x, y);
 			
 			var watermark = context.getImageData(0, 0, canvas.width, canvas.height).data;
 			
@@ -226,6 +233,10 @@ angular.module('WMJS', ['ngMaterial'])
 		<md-input-container>
 			<label>Level</label>
 			<input ng-model="ctrl.lighten" type="number" ng-disabled="ctrl.comparing" ng-change="ctrl.update()">
+		</md-input-container>
+		<md-input-container>
+			<label>Randomness</label>
+			<input ng-model="ctrl.randomness" type="number" ng-disabled="ctrl.comparing" ng-change="ctrl.update()">
 		</md-input-container>
 	</div>
 	<div layout="column" layout-align="start center">
