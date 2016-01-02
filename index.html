@@ -15,32 +15,11 @@ canvas {
 <script>
 'use strict';
 
-function download(filename, text) {
-    var pom = document.createElement('a');
-    pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-    pom.setAttribute('download', filename);
-
-    if (document.createEvent) {
-        var event = document.createEvent('MouseEvents');
-        event.initEvent('click', true, true);
-        pom.dispatchEvent(event);
-    }
-    else {
-        pom.click();
-    }
-}
-
 angular.module('WMJS', ['ngMaterial'])
 .controller('WMJSCtrl', [
 	'$timeout',
 	function ($timeout) {
 		var self = this;
-		
-		self.text = 'WMJS';
-		self.lighten = 1;
-		self.comparing = false;
-		self.threshold = 1;
-		self.randomness = 10;
 		
 		self.original = document.getElementById('wm-original');
 		self.watermark = document.getElementById('wm-watermark');
@@ -51,6 +30,23 @@ angular.module('WMJS', ['ngMaterial'])
 		self.compare = document.getElementById('wm-compare');
 		
 		self.canvases = [self.original, self.watermark, self.processed];
+		
+		self.clear = function () {
+			self.text = 'WMJS';
+			self.lighten = 1;
+			self.comparing = false;
+			self.threshold = 1;
+			self.randomness = 10;
+			
+			self.file.value = null;
+			self.compare.value = null;
+			
+			self.canvases.forEach(function (canvas) {
+				canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+			});
+		};
+		
+		self.clear();
 		
 		self.file.onchange = function (e) {
 			var reader = new FileReader();
@@ -211,6 +207,7 @@ angular.module('WMJS', ['ngMaterial'])
 <div class="md-padding" layout="rom" layout-align="center start">
 	<div layout="column" layout-align="start center">
 		<canvas id="wm-original"></canvas>
+		<md-button class="md-raised md-primary" ng-click="ctrl.clear()">Clear</md-button>
 		<div layout="column" layout-align="start start">
 			<h3>Upload Original</h3>
 			<input id="wm-file" type="file">
