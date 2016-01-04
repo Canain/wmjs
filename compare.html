@@ -1,6 +1,5 @@
 <html lang="en">
 <head>
-<meta charset="UTF-8"> 
 <link rel="stylesheet" href="lib/angular-material/angular-material.css">
 <script src="lib/angular/angular.js"></script>
 <script src="lib/angular-animate/angular-animate.js"></script>
@@ -11,7 +10,6 @@
 canvas {
 	height: 50vh;
 	width: 30vw;
-	border: 1px solid black;
 }
 </style>
 <script>
@@ -26,19 +24,22 @@ angular.module('WMJS', ['ngMaterial'])
 		self.original = document.getElementById('wm-original');
 		self.watermark = document.getElementById('wm-watermark');
 		self.processed = document.getElementById('wm-processed');
-		self.analyzed = document.getElementById('wm-analyzed');
 		
 		self.file = document.getElementById('wm-file');
 		self.download = document.getElementById('wm-download');
+		self.compare = document.getElementById('wm-compare');
 		
-		self.canvases = [self.original, self.watermark, self.processed, self.analyzed];
+		self.canvases = [self.original, self.watermark, self.processed];
 		
 		self.clear = function () {
 			self.text = 'WMJS';
 			self.lighten = 1;
+			self.comparing = false;
+			self.threshold = 1;
 			self.randomness = 10;
 			
 			self.file.value = null;
+			self.compare.value = null;
 			
 			self.canvases.forEach(function (canvas) {
 				canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
@@ -72,7 +73,6 @@ angular.module('WMJS', ['ngMaterial'])
 						c.style.height = height + 'px';
 					});
 					context.drawImage(img, 0, 0);
-					self.analyze();
 					self.update();
 				};
 				img.src = event.target.result;
@@ -124,23 +124,10 @@ angular.module('WMJS', ['ngMaterial'])
 			
 			for (var i = 0; i < data.length; i += 4) {
 				var marked = watermark[i + 3];
-				var pixel = i / 4;
-				var x = pixel % canvas.width;
-				var y = (pixel - x) / canvas.width;
-				var diamond = x % 2 == y % 2;
-				if (marked && diamond) {
-					var red = data[i];
-					var green = data[i + 1];
-					var blue = data[i + 2];
-					if (red + increment > 255 || green + increment > 255 || blue + increment > 255) {
-						data[i] = red - increment;
-						data[i + 1] = green - increment;
-						data[i + 2] = blue - increment;
-					} else {
-						data[i] = red + increment;
-						data[i + 1] = green + increment;
-						data[i + 2] = blue + increment;
-					}
+				if (marked) {
+					data[i] = Math.max(Math.min(data[i] + increment, 255), 0);
+					data[i + 1] = Math.max(Math.min(data[i + 1] + increment, 255), 0);
+					data[i + 2] = Math.max(Math.min(data[i + 2] + increment, 255), 0);
 				}
 			}
 			
@@ -155,69 +142,61 @@ angular.module('WMJS', ['ngMaterial'])
 			self.name = name + 'wm.png';
 		};
 		
-		self.analyze = function () {
-			var canvas = self.original;
+		self.reverse = function () {
+			var canvas = self.processed;
 			var context = canvas.getContext('2d');
 			
+			var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+			var processed = imageData.data;
+			
+			canvas = self.original;
+			context = canvas.getContext('2d');
 			var original = context.getImageData(0, 0, canvas.width, canvas.height).data;
 			
-			canvas = self.analyzed;
+			canvas = self.watermark;
 			context = canvas.getContext('2d');
 			
+			for (var i = 0; i < processed.length; i += 4) {
+				var difference = 0;
+				var red = Math.abs(processed[i] - original[i]);
+				var green = Math.abs(processed[i + 1] - original[i + 1]);
+				var blue = Math.abs(processed[i + 2] - original[i + 2]);
+				if (red >= self.threshold) {
+					difference += red;
+				}
+				if (green >= self.threshold) {
+					difference += green;
+				}
+				if (blue >= self.threshold) {
+					difference += blue;
+				}
+				processed[i] = 0;
+				processed[i + 1] = 0;
+				processed[i + 2] = 0;
+				processed[i + 3] = difference ? 255 : 0;
+			}
+			
 			context.clearRect(0, 0, canvas.width, canvas.height);
-			
-			var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-			var data = imageData.data;
-			
-			function getPixel(x, y) {
-				var pixel = y * canvas.width + x;
-				if (pixel < 0 || pixel > data.length) {
-					return null;
-				}
-				return pixel;
-			}
-			
-			for (var x = 0; x < canvas.width; x++) {
-				for (var y = 0; y < canvas.height; y++) {
-					var pixel = getPixel(x, y);
-					var i = pixel * 4;
-					
-					var red = original[i];
-					var green = original[i + 1];
-					var blue = original[i + 2];
-					
-					var up = getPixel(x, y - 1);
-					var down = getPixel(x, y + 1);
-					var left = getPixel(x - 1, y);
-					var right = getPixel(x + 1, y);
-					
-					var surround = [up, down, left, right];
-					
-					var diffs = surround.map(function (pos) {
-						if (pos !== null) {
-							var index = pos * 4;
-							var redDiff = original[index] - red;
-							var greenDiff = original[index + 1] - green;
-							var blueDiff = original[index + 2] - blue;
-							if (redDiff == greenDiff && greenDiff == blueDiff) {
-								return redDiff;
-							}
-							return null;
-						}
-						return null;
-					});
-					
-					var reduced = diffs.reduce(function (a, b) {
-						return a === b ? a : false;
-					});
-					
-					if (reduced) {
-						data[i + 3] = 255;
-					}
-				}
-			}
-			
 			context.putImageData(imageData, 0, 0);
+		};
+		
+		self.compare.onchange = function (e) {
+			var reader = new FileReader();
+			reader.onload = function (event) {
+				$timeout(function () {
+					self.comparing = true;
+				});
+				var img = new Image();
+				img.onload = function () {
+					var canvas = self.processed;
+					var context = canvas.getContext('2d');
+					context.drawImage(img, 0, 0);
+					
+					self.reverse();
+				};
+				img.src = event.target.result;
+			};
+			reader.readAsDataURL(e.target.files[0]);
 		};
 	}
 ]);
@@ -227,24 +206,39 @@ angular.module('WMJS', ['ngMaterial'])
 <md-content>
 <div class="md-padding" layout="rom" layout-align="center start">
 	<div layout="column" layout-align="start center">
-		<canvas id="wm-analyzed"></canvas>
-	</div>
-	<div layout="column" layout-align="start center">
 		<canvas id="wm-original"></canvas>
-		<input id="wm-file" type="file">
+		<md-button class="md-raised md-primary" ng-click="ctrl.clear()">Clear</md-button>
+		<div layout="column" layout-align="start start">
+			<h3>Upload Original</h3>
+			<input id="wm-file" type="file">
+		</div>
+		<div layout="column" layout-align="start start">
+			<h3>Reverse Watermark</h3>
+			<md-input-container>
+				<label>Threshold</label>
+				<input ng-model="ctrl.threshold" type="number" ng-disabled="!ctrl.comparing" ng-change="ctrl.reverse()">
+			</md-input-container>
+			<input id="wm-compare" type="file">
+		</div>
 	</div>
 	<div layout="column" layout-align="start center">
 		<canvas id="wm-watermark"></canvas>
-		<canvas id="wm-processed" ng-hide="true"></canvas>
-		<md-button id="wm-download" class="md-raised md-primary" download="{{ctrl.name}}" ng-href="#">Download Watermarked</md-button>
 		<md-input-container>
 			<label>Watermark</label>
-			<input ng-model="ctrl.text" ng-change="ctrl.update()">
+			<input ng-model="ctrl.text" ng-disabled="ctrl.comparing" ng-change="ctrl.update()">
+		</md-input-container>
+		<md-input-container>
+			<label>Level</label>
+			<input ng-model="ctrl.lighten" type="number" ng-disabled="ctrl.comparing" ng-change="ctrl.update()">
 		</md-input-container>
 		<md-input-container>
 			<label>Randomness</label>
-			<input ng-model="ctrl.randomness" type="number" ng-change="ctrl.update()">
+			<input ng-model="ctrl.randomness" type="number" ng-disabled="ctrl.comparing" ng-change="ctrl.update()">
 		</md-input-container>
+	</div>
+	<div layout="column" layout-align="start center">
+		<canvas id="wm-processed"></canvas>
+		<md-button id="wm-download" class="md-raised md-primary" ng-disabled="ctrl.comparing" download="{{ctrl.name}}" ng-href="#">Download</md-button>
 	</div>
 </div>
 </md-content>
