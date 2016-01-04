@@ -99,7 +99,14 @@ angular.module('WMJS', ['ngMaterial'])
 			
 			context.clearRect(0, 0, canvas.width, canvas.height);
 			
-			var size = Math.min(canvas.height, canvas.width) / 3;
+			var size = Math.min(canvas.height, canvas.width) / 4;
+			
+			function getRandom() {
+				return self.randomness / 2 - Math.random() * self.randomness;
+			}
+			
+			size *= 1 + getRandom() / 100;
+			
 			context.font = 'bold ' + size + 'px sans-serif';
 			
 			var measure = context.measureText(text);
@@ -108,8 +115,8 @@ angular.module('WMJS', ['ngMaterial'])
 			var x = canvas.width / 2 - width / 2;
 			var y = canvas.height / 2
 			
-			x += self.randomness / 2 - Math.random() * self.randomness;
-			y += self.randomness / 2 - Math.random() * self.randomness;
+			x += getRandom() / 100 * size;
+			y += getRandom() / 100 * size;
 			
 			context.fillText(text, x, y);
 			
