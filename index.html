@@ -9,7 +9,7 @@
 <script src="lib/angular-material/angular-material.js"></script>
 <style>
 canvas {
-	height: 50vh;
+	height: 60vh;
 	width: 30vw;
 	border: 1px solid black;
 }
@@ -48,6 +48,13 @@ angular.module('WMJS', ['ngMaterial'])
 		self.clear();
 		
 		self.file.onchange = function (e) {
+			$timeout(function () {
+				var path = self.file.value.split(/\/|\\/);
+				var name = path[path.length - 1];
+				name = name.substring(0, name.indexOf('.'));
+				self.name = name + 'wm.png';
+			});
+			
 			var reader = new FileReader();
 			reader.onload = function (event) {
 				var img = new Image();
@@ -62,7 +69,7 @@ angular.module('WMJS', ['ngMaterial'])
 						width = viewportWidth * 0.3;
 						height = width * img.height / img.width;
 					} else {
-						height = viewportHeight * 0.5;
+						height = viewportHeight * 0.6;
 						width = height * img.width / img.height;
 					}
 					self.canvases.forEach(function (c) {
@@ -147,12 +154,8 @@ angular.module('WMJS', ['ngMaterial'])
 			context.clearRect(0, 0, canvas.width, canvas.height);
 			context.putImageData(imageData, 0, 0);
 			
-			var path = self.file.value.split(/\/|\\/);
-			var name = path[path.length - 1];
 			var contents = canvas.toDataURL('image/png');
-			name = name.substring(0, name.indexOf('.'));
 			self.download.setAttribute('href', contents);
-			self.name = name + 'wm.png';
 		};
 		
 		self.analyze = function () {
@@ -224,28 +227,39 @@ angular.module('WMJS', ['ngMaterial'])
 </script>
 </head>
 <body ng-cloak ng-app="WMJS" ng-controller="WMJSCtrl as ctrl">
-<md-content>
-<div class="md-padding" layout="rom" layout-align="center start">
+<md-content class="md-padding" layout="column" layout-align="start center">
+<div layout="row" layout-align="center start">
 	<div layout="column" layout-align="start center">
+		<h1>Watermark Analysis</h1>
 		<canvas id="wm-analyzed"></canvas>
 	</div>
 	<div layout="column" layout-align="start center">
+		<h1>Uploaded Image</h1>
 		<canvas id="wm-original"></canvas>
-		<input id="wm-file" type="file">
 	</div>
 	<div layout="column" layout-align="start center">
+		<h1>Watermark Image</h1>
 		<canvas id="wm-watermark"></canvas>
 		<canvas id="wm-processed" ng-hide="true"></canvas>
-		<md-button id="wm-download" class="md-raised md-primary" download="{{ctrl.name}}" ng-href="#">Download Watermarked</md-button>
-		<md-input-container>
-			<label>Watermark</label>
-			<input ng-model="ctrl.text" ng-change="ctrl.update()">
-		</md-input-container>
-		<md-input-container>
-			<label>Randomness</label>
-			<input ng-model="ctrl.randomness" type="number" ng-change="ctrl.update()">
-		</md-input-container>
 	</div>
+</div>
+<div layout="row" layout-align="center start" class="md-padding">
+	<div class="md-padding">
+		<input id="wm-file" type="file">
+	</div>
+	<md-input-container>
+		<label>Watermark</label>
+		<input ng-model="ctrl.text" ng-change="ctrl.update()">
+	</md-input-container>
+	<md-input-container>
+		<label>Randomness</label>
+		<input ng-model="ctrl.randomness" type="number" ng-change="ctrl.update()">
+	</md-input-container>
+	<md-input-container>
+		<label>Download Name</label>
+		<input ng-model="ctrl.name">
+	</md-input-container>
+	<md-button id="wm-download" class="md-raised md-primary" download="{{ctrl.name}}" ng-href="#">Download Watermarked</md-button>
 </div>
 </md-content>
 </body>
