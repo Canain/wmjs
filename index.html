@@ -7,17 +7,19 @@
 <script src="lib/angular-aria/angular-aria.js"></script>
 <script src="lib/angular-messages/angular-messages.js"></script>
 <script src="lib/angular-material/angular-material.js"></script>
-<script src="lib/qcode-decoder/build/qrcode.js"></script>
+<script src="lib/qcode-decoder/build/qcode-decoder.min.js"></script>
 <script src="lib/qr-js/qr.js"></script>
 <style>
 canvas {
-	height: 60vh;
+	height: 35vh;
 	width: 30vw;
 	border: 1px solid black;
 }
 </style>
 <script>
 'use strict';
+
+// The following code is written as if var is let in order to allow for easy es6 conversion
 
 angular.module('WMJS', ['ngMaterial'])
 .controller('WMJSCtrl', [
@@ -29,16 +31,16 @@ angular.module('WMJS', ['ngMaterial'])
 		self.watermark = document.getElementById('wm-watermark');
 		self.processed = document.getElementById('wm-processed');
 		self.analyzed = document.getElementById('wm-analyzed');
+		self.analyzedQr = document.getElementById('wm-analyzed-qr');
 		
 		self.file = document.getElementById('wm-file');
 		self.download = document.getElementById('wm-download');
 		
-		self.canvases = [self.original, self.watermark, self.processed, self.analyzed];
+		self.canvases = [self.original, self.watermark, self.processed, self.analyzed, self.analyzedQr];
 		
 		self.clear = function () {
 			self.text = '';
 			self.lighten = 1;
-			self.randomness = 10;
 			
 			self.file.value = null;
 			
@@ -71,7 +73,7 @@ angular.module('WMJS', ['ngMaterial'])
 						width = viewportWidth * 0.3;
 						height = width * img.height / img.width;
 					} else {
-						height = viewportHeight * 0.6;
+						height = viewportHeight * 0.35;
 						width = height * img.width / img.height;
 					}
 					self.canvases.forEach(function (c) {
@@ -162,6 +164,9 @@ angular.module('WMJS', ['ngMaterial'])
 					
 					context.clearRect(0, 0, canvas.width, canvas.height);
 					
+					context.imageSmoothingEnabled = false;
+					context.mozImageSmoothingEnabled = false;
+					
 					context.drawImage(img, 0, 0, img.width * scale, img.height * scale);
 					
 					self.imprint();
@@ -170,7 +175,8 @@ angular.module('WMJS', ['ngMaterial'])
 				qr.image({
 					image: img,
 					value: text,
-					level: 'H'
+					level: 'H',
+					size: 4
 				});
 				
 				// var size = Math.min(canvas.height, canvas.width) / 4;
@@ -291,9 +297,124 @@ angular.module('WMJS', ['ngMaterial'])
 				}
 			}
 			
-			// Attempt to correct perceived errors
+			// Attempt to generate qr code
 			
+			// First, figure out dimension of qr code
 			
+			var left = [];
+			var right = [];
+			var top = [];
+			var bot = [];
+			
+			for (var x = 0; x < canvas.width; x++) {
+				for (var y = 0; y < canvas.height; y++) {
+					var pixel = getPixel(x, y);
+					var i = pixel * 4;
+					if (data[i + 3]) {
+						if (left[y] === undefined) {
+							left[y] = x;
+						}
+						if (top[x] === undefined) {
+							top[x] = y;
+						}
+						right[y] = x;
+						bot[x] = y;
+					}
+				}
+			}
+			
+			var widths = [];
+			for (var i = 0; i < left.length; i++) {
+				if (right[i] !== undefined && left[i] !== undefined) {
+					widths.push(right[i] - left[i]);
+				}
+			}
+			var heights = [];
+			for (var i = 0; i < top.length; i++) {
+				if (bot[i] !== undefined && top[i] !== undefined) {
+					heights.push(bot[i] - top[i]);
+				}
+			}
+			
+			function mode(array) {
+				var freq = [];
+				var highestFreq = 0;
+				var num;
+				array.forEach(function (val) {
+					var f = (freq[val] === undefined ? 0 : freq[val]) + 1;
+					freq[val] = f;
+					if (f > highestFreq) {
+						highestFreq = f;
+						num = val;
+					}
+				});
+				return num;
+			}
+			
+			var width = mode(widths);
+			var height = mode(heights);
+			
+			var startLeft = mode(left);
+			var startTop = mode(top);
+			
+			if (width !== undefined && width === height) {
+				var dim = width;
+				var blockSize = Math.ceil(dim / 21);
+				
+				var expectedBlacks = blockSize * blockSize;
+				
+				var qr = [];
+				for (var i = 0; i < dim; i++) {
+					qr.push([]);
+				}
+				
+				for (var x = 0; x < 21; x++) {
+					for (var y = 0; y < 21; y++) {
+						qr[x][y] = 0;
+					}
+				}
+				
+				for (var x = 0; x < dim; x++) {
+					for (var y = 0; y < dim; y++) {
+						var pixel = getPixel(x + startLeft, y + startTop);
+						var i = pixel * 4;
+						if (data[i + 3]) {
+							qr[Math.floor(x / blockSize)][Math.floor(y / blockSize)]++;
+						}
+					}
+				}
+				
+				var qrCanvas = self.analyzedQr;
+				var qrContext = qrCanvas.getContext('2d');
+				
+				qrContext.clearRect(0, 0, qrCanvas.width, qrContext.height);
+				
+				var qrImageData = qrContext.getImageData(0, 0, qrCanvas.width, qrCanvas.height);
+				var qrData = qrImageData.data;
+				
+				for (var x = 0; x < dim; x++) {
+					for (var y = 0; y < dim; y++) {
+						var pixel = getPixel(x + startLeft, y + startTop);
+						var i = pixel * 4;
+						if (qr[Math.floor(x / blockSize)][Math.floor(y / blockSize)] > expectedBlacks / 20) {
+							qrData[i + 3] = 255;
+						}
+					}
+				}
+				
+				qrContext.putImageData(qrImageData, 0, 0);
+				
+				var img = new Image();
+				img.onload = function () {
+					QCodeDecoder().decodeFromImage(img, function (error, res) {
+						console.log(error);
+						console.log(res);
+					});
+				};
+				img.src = qrCanvas.toDataURL('image/png');
+			} else {
+				console.log('Unable to determine qr code dimensions: width=' + width + ' height=' + height);
+			}
 			
 			context.putImageData(imageData, 0, 0);
 		};
@@ -306,16 +427,17 @@ angular.module('WMJS', ['ngMaterial'])
 <div layout="row" layout-align="center start">
 	<div layout="column" layout-align="start center">
 		<h1>Watermark Analysis</h1>
-		<canvas id="wm-analyzed"></canvas>
+		<canvas id="wm-analyzed" ng-hide="false"></canvas>
+		<canvas id="wm-analyzed-qr" ng-hide="false"></canvas>
 	</div>
 	<div layout="column" layout-align="start center">
 		<h1>Uploaded Image</h1>
 		<canvas id="wm-original"></canvas>
 	</div>
 	<div layout="column" layout-align="start center">
-		<h1>Watermark Image</h1>
-		<canvas id="wm-watermark"></canvas>
-		<canvas id="wm-processed" ng-hide="true"></canvas>
+		<h1>Watermarked Image</h1>
+		<canvas id="wm-watermark" ng-hide="false"></canvas>
+		<canvas id="wm-processed" ng-hide="false"></canvas>
 	</div>
 </div>
 <div layout="row" layout-align="center start" class="md-padding">
@@ -325,10 +447,6 @@ angular.module('WMJS', ['ngMaterial'])
 	<md-input-container>
 		<label>Watermark</label>
 		<input ng-model="ctrl.text">
-	</md-input-container>
-	<md-input-container>
-		<label>Randomness</label>
-		<input ng-model="ctrl.randomness" type="number">
 	</md-input-container>
 	<md-button class="md-raised md-primary" ng-click="ctrl.update()">Generate</md-button>
 	<md-input-container>
