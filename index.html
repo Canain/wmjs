@@ -456,6 +456,10 @@ angular.module('WMJS', ['ngMaterial'])
 				
 				context.clearRect(0, 0, canvas.width, canvas.height);
 				
+				$timeout(function () {
+					self.decoded = null;
+				});
+				
 				imageData = context.getImageData(0, 0, canvas.width, canvas.height);
 				data = imageData.data;
 				
@@ -480,14 +484,13 @@ angular.module('WMJS', ['ngMaterial'])
 				var img = new Image();
 				img.onload = function () {
 					QCodeDecoder().decodeFromImage(img, function (error, res) {
-						$timeout(function () {
-							if (error) {
-								console.log(error);
-								self.decoded = null;
-							} else {
+						if (error) {
+							console.log(error);
+						} else {
+							$timeout(function () {
 								self.decoded = res;
-							}
-						});
+							});
+						}
 					});
 				};
 				img.src = canvas.toDataURL('image/png');
