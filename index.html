@@ -36,7 +36,7 @@ angular.module('WMJS', ['ngMaterial'])
 		self.canvases = [self.original, self.watermark, self.processed, self.analyzed];
 		
 		self.clear = function () {
-			self.text = 'WMJS';
+			self.text = '';
 			self.lighten = 1;
 			self.randomness = 10;
 			
@@ -81,7 +81,6 @@ angular.module('WMJS', ['ngMaterial'])
 						c.style.height = height + 'px';
 					});
 					context.drawImage(img, 0, 0);
-					self.analyze();
 					self.update();
 				};
 				img.src = event.target.result;
@@ -89,51 +88,11 @@ angular.module('WMJS', ['ngMaterial'])
 			reader.readAsDataURL(e.target.files[0]);
 		};
 		
-		self.update = function () {
-			if (!self.file.value) {
-				return;
-			}
-			
-			var text = self.text;
+		self.imprint = function () {
+			// Imprint watermark
 			
 			var canvas = self.watermark;
 			var context = canvas.getContext('2d');
-			
-			context.clearRect(0, 0, canvas.width, canvas.height);
-			
-			// Draw watermark
-			
-			var img = qr.image({
-				value: text,
-				level: 'H'
-			});
-			
-			var scale = Math.floor(Math.min(canvas.width, canvas.height) / Math.max(img.width, img.height));
-			
-			context.drawImage(img, 0, 0, img.width * scale, img.height * scale);
-			
-			// var size = Math.min(canvas.height, canvas.width) / 4;
-			
-			// function getRandom() {
-			// 	return self.randomness / 2 - Math.random() * self.randomness;
-			// }
-			
-			// size *= 1 + getRandom() / 100;
-			
-			// context.font = 'bold ' + size + 'px sans-serif';
-			
-			// var measure = context.measureText(text);
-			// var width = measure.width;
-			
-			// var x = canvas.width / 2 - width / 2;
-			// var y = canvas.height / 2
-			
-			// x += getRandom() / 100 * size;
-			// y += getRandom() / 100 * size;
-			
-			// context.fillText(text, x, y);
-			
-			// Imprint watermark
 			
 			var watermark = context.getImageData(0, 0, canvas.width, canvas.height).data;
 			
@@ -178,10 +137,71 @@ angular.module('WMJS', ['ngMaterial'])
 			
 			var contents = canvas.toDataURL('image/png');
 			self.download.setAttribute('href', contents);
+			
+			self.analyze();
+		};
+		
+		self.update = function () {
+			if (!self.file.value) {
+				return;
+			}
+			
+			var text = self.text;
+			
+			var canvas = self.watermark;
+			var context = canvas.getContext('2d');
+			
+			if (text != '') {
+				
+				// Draw watermark
+				
+				var img = new Image();
+				
+				img.onload = function () {
+					var scale = Math.floor(Math.min(canvas.width, canvas.height) / Math.max(img.width, img.height));
+					
+					context.clearRect(0, 0, canvas.width, canvas.height);
+					
+					context.drawImage(img, 0, 0, img.width * scale, img.height * scale);
+					
+					self.imprint();
+				};
+				
+				qr.image({
+					image: img,
+					value: text,
+					level: 'H'
+				});
+				
+				// var size = Math.min(canvas.height, canvas.width) / 4;
+				
+				// function getRandom() {
+				// 	return self.randomness / 2 - Math.random() * self.randomness;
+				// }
+				
+				// size *= 1 + getRandom() / 100;
+				
+				// context.font = 'bold ' + size + 'px sans-serif';
+				
+				// var measure = context.measureText(text);
+				// var width = measure.width;
+				
+				// var x = canvas.width / 2 - width / 2;
+				// var y = canvas.height / 2
+				
+				// x += getRandom() / 100 * size;
+				// y += getRandom() / 100 * size;
+				
+				// context.fillText(text, x, y);
+			} else {
+				context.clearRect(0, 0, canvas.width, canvas.height);
+				
+				self.imprint();
+			}
 		};
 		
 		self.analyze = function () {
-			var canvas = self.original;
+			var canvas = self.processed;
 			var context = canvas.getContext('2d');
 			
 			var original = context.getImageData(0, 0, canvas.width, canvas.height).data;
@@ -271,6 +291,10 @@ angular.module('WMJS', ['ngMaterial'])
 				}
 			}
 			
+			// Attempt to correct perceived errors
+			
+			
+			
 			context.putImageData(imageData, 0, 0);
 		};
 	}
@@ -300,12 +324,13 @@ angular.module('WMJS', ['ngMaterial'])
 	</div>
 	<md-input-container>
 		<label>Watermark</label>
-		<input ng-model="ctrl.text" ng-change="ctrl.update()">
+		<input ng-model="ctrl.text">
 	</md-input-container>
 	<md-input-container>
 		<label>Randomness</label>
-		<input ng-model="ctrl.randomness" type="number" ng-change="ctrl.update()">
+		<input ng-model="ctrl.randomness" type="number">
 	</md-input-container>
+	<md-button class="md-raised md-primary" ng-click="ctrl.update()">Generate</md-button>
 	<md-input-container>
 		<label>Download Name</label>
 		<input ng-model="ctrl.name">
