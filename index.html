@@ -209,7 +209,7 @@ angular.module('WMJS', ['ngMaterial'])
 							var redDiff = original[index] - red;
 							var greenDiff = original[index + 1] - green;
 							var blueDiff = original[index + 2] - blue;
-							if (redDiff == greenDiff && greenDiff == blueDiff) {
+							if (redDiff == greenDiff && greenDiff == blueDiff && Math.abs(redDiff) == 1) {
 								return redDiff;
 							}
 							return null;
@@ -223,6 +223,35 @@ angular.module('WMJS', ['ngMaterial'])
 					
 					if (reduced) {
 						data[i + 3] = 255;
+					}
+				}
+			}
+			
+			// Loop again to remove outliers
+			
+			for (var x = 0; x < canvas.width; x++) {
+				for (var y = 0; y < canvas.height; y++) {
+					var pixel = getPixel(x, y);
+					var i = pixel * 4;
+					if (data[i + 3]) {
+						var up = getPixel(x, y - 1);
+						var down = getPixel(x, y + 1);
+						var left = getPixel(x - 1, y);
+						var right = getPixel(x + 1, y);
+						
+						var surround = [up, down, left, right];
+						var diffs = surround.map(function (pos) {
+							if (pos !== null) {
+								var index = pos * 4;
+								return data[index + 3];
+							}
+							return false;
+						});
+						if (!diffs.reduce(function (a, b) {
+							return a || b;
+						})) {
+							data[i + 3] = 0;
+						}
 					}
 				}
 			}
