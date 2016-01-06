@@ -41,6 +41,7 @@ angular.module('WMJS', ['ngMaterial'])
 		self.clear = function () {
 			self.text = '';
 			self.lighten = 1;
+			self.decoded = null;
 			
 			self.file.value = null;
 			
@@ -458,12 +459,18 @@ angular.module('WMJS', ['ngMaterial'])
 				imageData = context.getImageData(0, 0, canvas.width, canvas.height);
 				data = imageData.data;
 				
+				for (var i = 0; i < data.length; i++) {
+					data[i] = 255;
+				}
+				
 				for (var x = 0; x < dim; x++) {
 					for (var y = 0; y < dim; y++) {
 						var pixel = getPixel(x + startLeft, y + startTop);
 						var i = pixel * 4;
 						if (qr[Math.floor(x / blockSize)][Math.floor(y / blockSize)] > expectedBlacks / 20) {
-							data[i + 3] = 255;
+							data[i] = 0;
+							data[i + 1] = 0;
+							data[i + 2] = 0;
 						}
 					}
 				}
@@ -473,8 +480,14 @@ angular.module('WMJS', ['ngMaterial'])
 				var img = new Image();
 				img.onload = function () {
 					QCodeDecoder().decodeFromImage(img, function (error, res) {
-						console.log(error);
-						console.log(res);
+						$timeout(function () {
+							if (error) {
+								console.log(error);
+								self.decoded = null;
+							} else {
+								self.decoded = res;
+							}
+						});
 					});
 				};
 				img.src = canvas.toDataURL('image/png');
@@ -500,6 +513,10 @@ angular.module('WMJS', ['ngMaterial'])
 	<div layout="column" layout-align="start center">
 		<h1>Uploaded Image</h1>
 		<canvas id="wm-original"></canvas>
+		<div layout="column" layout-align="start center" ng-hide="ctrl.decoded == null">
+			<h1>Decoded:</h1>
+			<h2>{{ctrl.decoded}}</h2>
+		</div>
 	</div>
 	<div layout="column" layout-align="start center">
 		<h1>Watermarked Image</h1>
