@@ -113,6 +113,13 @@ angular.module('WMJS', ['ngMaterial'])
 			var increment = self.lighten;
 			
 			for (var i = 0; i < data.length; i += 4) {
+				if (!data[i + 3]) {
+					data[i] = 255;
+					data[i + 1] = 255;
+					data[i + 2] = 255;
+					data[i + 3] = 255;
+				}
+				
 				var marked = watermark[i + 3] && !watermark[i];
 				var pixel = i / 4;
 				var x = pixel % canvas.width;
