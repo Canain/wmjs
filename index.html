@@ -7,6 +7,8 @@
 <script src="lib/angular-aria/angular-aria.js"></script>
 <script src="lib/angular-messages/angular-messages.js"></script>
 <script src="lib/angular-material/angular-material.js"></script>
+<script src="lib/qcode-decoder/build/qrcode.js"></script>
+<script src="lib/qr-js/qr.js"></script>
 <style>
 canvas {
 	height: 60vh;
@@ -99,26 +101,39 @@ angular.module('WMJS', ['ngMaterial'])
 			
 			context.clearRect(0, 0, canvas.width, canvas.height);
 			
-			var size = Math.min(canvas.height, canvas.width) / 4;
+			// Draw watermark
 			
-			function getRandom() {
-				return self.randomness / 2 - Math.random() * self.randomness;
-			}
+			var img = qr.image({
+				value: text,
+				level: 'H'
+			});
 			
-			size *= 1 + getRandom() / 100;
+			var scale = Math.floor(Math.min(canvas.width, canvas.height) / Math.max(img.width, img.height));
 			
-			context.font = 'bold ' + size + 'px sans-serif';
+			context.drawImage(img, 0, 0, img.width * scale, img.height * scale);
 			
-			var measure = context.measureText(text);
-			var width = measure.width;
+			// var size = Math.min(canvas.height, canvas.width) / 4;
 			
-			var x = canvas.width / 2 - width / 2;
-			var y = canvas.height / 2
+			// function getRandom() {
+			// 	return self.randomness / 2 - Math.random() * self.randomness;
+			// }
 			
-			x += getRandom() / 100 * size;
-			y += getRandom() / 100 * size;
+			// size *= 1 + getRandom() / 100;
 			
-			context.fillText(text, x, y);
+			// context.font = 'bold ' + size + 'px sans-serif';
+			
+			// var measure = context.measureText(text);
+			// var width = measure.width;
+			
+			// var x = canvas.width / 2 - width / 2;
+			// var y = canvas.height / 2
+			
+			// x += getRandom() / 100 * size;
+			// y += getRandom() / 100 * size;
+			
+			// context.fillText(text, x, y);
+			
+			// Imprint watermark
 			
 			var watermark = context.getImageData(0, 0, canvas.width, canvas.height).data;
 			
@@ -137,7 +152,7 @@ angular.module('WMJS', ['ngMaterial'])
 			var increment = self.lighten;
 			
 			for (var i = 0; i < data.length; i += 4) {
-				var marked = watermark[i + 3];
+				var marked = watermark[i + 3] && !watermark[i];
 				var pixel = i / 4;
 				var x = pixel % canvas.width;
 				var y = (pixel - x) / canvas.width;
