@@ -304,6 +304,8 @@ angular.module('WMJS', ['ngMaterial'])
 				}
 			}
 			
+			context.putImageData(imageData, 0, 0);
+			
 			// Attempt to generate qr code
 			
 			// First, figure out dimension of qr code
@@ -448,25 +450,25 @@ angular.module('WMJS', ['ngMaterial'])
 					}
 				}
 				
-				var qrCanvas = self.analyzedQr;
-				var qrContext = qrCanvas.getContext('2d');
+				canvas = self.analyzedQr;
+				context = canvas.getContext('2d');
 				
-				qrContext.clearRect(0, 0, qrCanvas.width, qrCanvas.height);
+				context.clearRect(0, 0, canvas.width, canvas.height);
 				
-				var qrImageData = qrContext.getImageData(0, 0, qrCanvas.width, qrCanvas.height);
-				var qrData = qrImageData.data;
+				imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+				data = imageData.data;
 				
 				for (var x = 0; x < dim; x++) {
 					for (var y = 0; y < dim; y++) {
 						var pixel = getPixel(x + startLeft, y + startTop);
 						var i = pixel * 4;
 						if (qr[Math.floor(x / blockSize)][Math.floor(y / blockSize)] > expectedBlacks / 20) {
-							qrData[i + 3] = 255;
+							data[i + 3] = 255;
 						}
 					}
 				}
 				
-				qrContext.putImageData(qrImageData, 0, 0);
+				context.putImageData(imageData, 0, 0);
 				
 				var img = new Image();
 				img.onload = function () {
@@ -475,12 +477,13 @@ angular.module('WMJS', ['ngMaterial'])
 						console.log(res);
 					});
 				};
-				img.src = qrCanvas.toDataURL('image/png');
+				img.src = canvas.toDataURL('image/png');
 			} else {
 				console.log('Unable to determine qr code dimensions: width=' + width + ' height=' + height);
+				
+				context.putImageData(imageData, 0, 0);
 			}
 			
-			context.putImageData(imageData, 0, 0);
 		};
 	}
 ]);
