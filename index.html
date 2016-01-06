@@ -364,7 +364,7 @@ angular.module('WMJS', ['ngMaterial'])
 				var expectedBlacks = blockSize * blockSize;
 				
 				var qr = [];
-				for (var i = 0; i < dim; i++) {
+				for (var i = 0; i < 21; i++) {
 					qr.push([]);
 				}
 				
@@ -381,6 +381,63 @@ angular.module('WMJS', ['ngMaterial'])
 						if (data[i + 3]) {
 							qr[Math.floor(x / blockSize)][Math.floor(y / blockSize)]++;
 						}
+					}
+				}
+				
+				// Fill in areas that have to be filled in
+				
+				// Horizontals
+				for (var i = 0; i < 7; i++) {
+					qr[i][0] = expectedBlacks;
+				}
+				for (var i = 0; i < 7; i++) {
+					qr[i][6] = expectedBlacks;
+				}
+				for (var i = 14; i < 14 + 7; i++) {
+					qr[i][0] = expectedBlacks;
+				}
+				for (var i = 14; i < 14 + 7; i++) {
+					qr[i][6] = expectedBlacks;
+				}
+				for (var i = 0; i < 7; i++) {
+					qr[i][14] = expectedBlacks;
+				}
+				for (var i = 0; i < 7; i++) {
+					qr[i][20] = expectedBlacks;
+				}
+				// Verticals
+				for (var i = 0; i < 7; i++) {
+					qr[0][i] = expectedBlacks;
+				}
+				for (var i = 0; i < 7; i++) {
+					qr[6][i] = expectedBlacks;
+				}
+				for (var i = 14; i < 14 + 7; i++) {
+					qr[0][i] = expectedBlacks;
+				}
+				for (var i = 14; i < 14 + 7; i++) {
+					qr[6][i] = expectedBlacks;
+				}
+				for (var i = 0; i < 7; i++) {
+					qr[14][i] = expectedBlacks;
+				}
+				for (var i = 0; i < 7; i++) {
+					qr[20][i] = expectedBlacks;
+				}
+				// Blocks
+				for (var x = 0; x < 3; x++) {
+					for (var y = 0; y < 3; y++) {
+						qr[x + 2][y + 2] = expectedBlacks;
+					}
+				}
+				for (var x = 0; x < 3; x++) {
+					for (var y = 0; y < 3; y++) {
+						qr[x + 16][y + 2] = expectedBlacks;
+					}
+				}
+				for (var x = 0; x < 3; x++) {
+					for (var y = 0; y < 3; y++) {
+						qr[x + 2][y + 16] = expectedBlacks;
 					}
 				}
 				
