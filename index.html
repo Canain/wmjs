@@ -183,7 +183,7 @@ angular.module('WMJS', ['ngMaterial'])
 					image: img,
 					value: text,
 					level: 'H',
-					size: 4
+					size: 1
 				});
 				
 				// var size = Math.min(canvas.height, canvas.width) / 4;
@@ -451,7 +451,7 @@ angular.module('WMJS', ['ngMaterial'])
 				var qrCanvas = self.analyzedQr;
 				var qrContext = qrCanvas.getContext('2d');
 				
-				qrContext.clearRect(0, 0, qrCanvas.width, qrContext.height);
+				qrContext.clearRect(0, 0, qrCanvas.width, qrCanvas.height);
 				
 				var qrImageData = qrContext.getImageData(0, 0, qrCanvas.width, qrCanvas.height);
 				var qrData = qrImageData.data;
@@ -510,7 +510,7 @@ angular.module('WMJS', ['ngMaterial'])
 	</div>
 	<md-input-container>
 		<label>Watermark</label>
-		<input ng-model="ctrl.text">
+		<input ng-model="ctrl.text" md-maxlength="7">
 	</md-input-container>
 	<md-button class="md-raised md-primary" ng-click="ctrl.update()">Generate</md-button>
 	<md-input-container>
