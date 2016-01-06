@@ -210,6 +210,11 @@ angular.module('WMJS', ['ngMaterial'])
 			} else {
 				context.clearRect(0, 0, canvas.width, canvas.height);
 				
+				canvas = self.analyzedQr;
+				context = canvas.getContext('2d');
+				context.clearRect(0, 0, canvas.width, canvas.height);
+				self.decoded = null;
+				
 				self.imprint();
 			}
 		};
