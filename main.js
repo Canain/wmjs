@@ -332,42 +332,37 @@ angular.module('WMJS', ['ngMaterial'])
 				}
 			}
 			
-			function mode(array) {
-				var freq = [];
-				var highestFreq = 0;
-				var num;
+			function freqSort(array) {
+				var freqs = {};
 				array.forEach(function (val) {
-					var f = (freq[val] === undefined ? 0 : freq[val]) + 1;
-					freq[val] = f;
-					if (f > highestFreq) {
-						highestFreq = f;
-						num = val;
-					}
+					freqs[val] = freqs[val] ? freqs[val] + 1 : 1;
 				});
-				return num;
+				var list = [];
+				for (var i in freqs) {
+					list.push(parseInt(i));
+				}
+				list.sort(function (a, b) {
+					return freqs[b] - freqs[a];
+				});
+				return list;
 			}
 			
-			function freq(array) {
-				var freqs = [];
-				array.forEach(function (val, i) {
-					
-				});
-			}
+			var sortedWidths = freqSort(widths);
+			var sortedHeights = freqSort(heights);
+			var sortedLeft = freqSort(left);
+			var sortedTop = freqSort(top);
 			
-			console.log(widths);
-			console.log(heights);
-			console.log(left);
-			console.log(top);
+			var width = Math.max(sortedWidths[0], sortedWidths[1]);
+			var height = Math.max(sortedHeights[0], sortedHeights[1]);
 			
-			var width = mode(widths);
-			var height = mode(heights);
-			
-			var startLeft = mode(left);
-			var startTop = mode(top);
+			var startLeft = Math.min(sortedLeft[0], sortedLeft[1]);
+			var startTop = Math.min(sortedTop[0], sortedTop[1]);
 			
 			if (width !== undefined && width === height) {
 				var dim = width;
 				var blockSize = Math.ceil(dim / 21);
+				
+				console.log('Block size: ' + blockSize);
 				
 				var expectedBlacks = blockSize * blockSize;
 				
