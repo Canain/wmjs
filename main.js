@@ -17,6 +17,8 @@ angular.module('WMJS', ['ngMaterial'])
 		self.file = document.getElementById('wm-file');
 		self.download = document.getElementById('wm-download');
 		
+		self.qrSize = 25;
+		
 		self.canvases = [self.original, self.watermark, self.processed, self.analyzed, self.analyzedQr];
 		
 		self.clear = function () {
@@ -165,7 +167,7 @@ angular.module('WMJS', ['ngMaterial'])
 					image: img,
 					value: text,
 					level: 'H',
-					size: 1
+					size: 2
 				});
 				
 				// var size = Math.min(canvas.height, canvas.width) / 4;
@@ -360,19 +362,19 @@ angular.module('WMJS', ['ngMaterial'])
 			
 			if (width !== undefined && width === height) {
 				var dim = width;
-				var blockSize = Math.ceil(dim / 21);
+				var blockSize = Math.ceil(dim / self.qrSize);
 				
 				console.log('Block size: ' + blockSize);
 				
 				var expectedBlacks = blockSize * blockSize;
 				
 				var qr = [];
-				for (var i = 0; i < 21; i++) {
+				for (var i = 0; i < self.qrSize; i++) {
 					qr.push([]);
 				}
 				
-				for (var x = 0; x < 21; x++) {
-					for (var y = 0; y < 21; y++) {
+				for (var x = 0; x < self.qrSize; x++) {
+					for (var y = 0; y < self.qrSize; y++) {
 						qr[x][y] = 0;
 					}
 				}
@@ -396,17 +398,17 @@ angular.module('WMJS', ['ngMaterial'])
 				for (var i = 0; i < 7; i++) {
 					qr[i][6] = expectedBlacks;
 				}
-				for (var i = 14; i < 14 + 7; i++) {
+				for (var i = self.qrSize - 7; i < self.qrSize; i++) {
 					qr[i][0] = expectedBlacks;
 				}
-				for (var i = 14; i < 14 + 7; i++) {
+				for (var i = self.qrSize - 7; i < self.qrSize; i++) {
 					qr[i][6] = expectedBlacks;
 				}
 				for (var i = 0; i < 7; i++) {
-					qr[i][14] = expectedBlacks;
+					qr[i][self.qrSize - 7] = expectedBlacks;
 				}
 				for (var i = 0; i < 7; i++) {
-					qr[i][20] = expectedBlacks;
+					qr[i][self.qrSize - 1] = expectedBlacks;
 				}
 				// Verticals
 				for (var i = 0; i < 7; i++) {
@@ -415,17 +417,17 @@ angular.module('WMJS', ['ngMaterial'])
 				for (var i = 0; i < 7; i++) {
 					qr[6][i] = expectedBlacks;
 				}
-				for (var i = 14; i < 14 + 7; i++) {
+				for (var i = self.qrSize - 7; i < self.qrSize; i++) {
 					qr[0][i] = expectedBlacks;
 				}
-				for (var i = 14; i < 14 + 7; i++) {
+				for (var i = self.qrSize - 7; i < self.qrSize; i++) {
 					qr[6][i] = expectedBlacks;
 				}
 				for (var i = 0; i < 7; i++) {
-					qr[14][i] = expectedBlacks;
+					qr[self.qrSize - 7][i] = expectedBlacks;
 				}
 				for (var i = 0; i < 7; i++) {
-					qr[20][i] = expectedBlacks;
+					qr[self.qrSize - 1][i] = expectedBlacks;
 				}
 				// Blocks
 				for (var x = 0; x < 3; x++) {
@@ -435,12 +437,12 @@ angular.module('WMJS', ['ngMaterial'])
 				}
 				for (var x = 0; x < 3; x++) {
 					for (var y = 0; y < 3; y++) {
-						qr[x + 16][y + 2] = expectedBlacks;
+						qr[x + self.qrSize - 7 + 2][y + 2] = expectedBlacks;
 					}
 				}
 				for (var x = 0; x < 3; x++) {
 					for (var y = 0; y < 3; y++) {
-						qr[x + 2][y + 16] = expectedBlacks;
+						qr[x + 2][y + self.qrSize - 7 + 2] = expectedBlacks;
 					}
 				}
 				
