@@ -25,9 +25,17 @@ interface Canvas {
 class MainCtrl {
 	
 	original: Canvas;
+	imprint: Canvas;
+	processed: Canvas;
+	retrieved: Canvas;
 	
-	constructor(public $mdDialog: angular.material.IDialogService, public $timeout: angular.ITimeoutService) {
+	constructor(public $mdDialog: angular.material.IDialogService, 
+				public $timeout: angular.ITimeoutService) {
+		
 		this.original = this.getCanvas('wm-original');
+		this.imprint = this.getCanvas('wm-imprint');
+		this.processed = this.getCanvas('wm-proessed');
+		this.retrieved = this.getCanvas('wm-retrieved');
 	}
 	
 	getCanvas(id: string): Canvas {
