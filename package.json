@@ -1,0 +1,40 @@
+{
+  "name": "webpack-express",
+  "version": "1.0.0",
+  "description": "Webpack Express Template",
+  "main": "app.js",
+  "scripts": {
+    "postinstall": "bower install && typings install",
+    "start": "gulp watch"
+  },
+  "author": "Shuyang Chen <sc1085@gmail.com>",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "babel-core": "^6.5.2",
+    "babel-loader": "^6.2.2",
+    "babel-preset-es2015": "^6.5.0",
+    "bower": "^1.7.7",
+    "connect-livereload": "^0.5.4",
+    "css-loader": "^0.23.1",
+    "express": "^4.13.4",
+    "gulp": "^3.9.1",
+    "gulp-live-server": "0.0.29",
+    "gulp-typescript": "^2.11.0",
+    "gulp-uglify": "^1.5.3",
+    "json-loader": "^0.5.4",
+    "lzma-purejs": "^0.9.3",
+    "merge2": "^1.0.1",
+    "node-sass": "^3.4.2",
+    "run-sequence": "^1.1.5",
+    "sass-loader": "^3.1.2",
+    "socket.io": "^1.4.5",
+    "socket.io-client": "^1.4.5",
+    "style-loader": "^0.13.0",
+    "ts-loader": "^0.8.1",
+    "typescript": "^1.7.5",
+    "typings": "^0.7.8",
+    "webpack": "^1.12.13",
+    "webpack-stream": "^3.1.0"
+  }
+}

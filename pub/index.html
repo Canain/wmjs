@@ -1,0 +1,18 @@
+<html lang="en">
+	<head>
+		<title>Webpack Express</title>
+		<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+		<link rel="stylesheet" href="lib/angular-material/angular-material.min.css">
+		<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+		<script src="lib/angular/angular.min.js"></script>
+		<script src="lib/angular-aria/angular-aria.min.js"></script>
+		<script src="lib/angular-animate/angular-animate.min.js"></script>
+		<script src="lib/angular-material/angular-material.min.js"></script>
+		<script src="bundle.js"></script>
+	</head>
+	<body ng-app="WebpackExpress" ng-controller="MainCtrl as ctrl" ng-cloak>
+		<md-content>
+			<md-button class="md-raised">{{ctrl.content}}</md-button>
+		</md-content>
+	</body>
+</html>

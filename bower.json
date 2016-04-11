@@ -1,0 +1,23 @@
+{
+  "name": "webpack-express",
+  "description": "Webpack Express Template",
+  "main": "pub/index.html",
+  "authors": [
+    "Shuyang Chen <sc1085@gmail.com>"
+  ],
+  "license": "UNLICENSED",
+  "moduleType": [],
+  "homepage": "https://github.com/Canain/webpack-express",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "pub/lib",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular-material": "master"
+  }
+}

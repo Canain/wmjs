@@ -1,0 +1,21 @@
+{
+  "ambientDependencies": {
+    "Q": "github:DefinitelyTyped/DefinitelyTyped/q/Q.d.ts#4de74cb527395c13ba20b438c3a7a419ad931f1c",
+    "angular": "registry:dt/angular#1.5.0+20160328125810",
+    "angular-material": "registry:dt/angular-material#1.0.0-rc5.0+20160317120654",
+    "express": "github:DefinitelyTyped/DefinitelyTyped/express/express.d.ts#dd638012d63e069f2c99d06ef4dcc9616a943ee4",
+    "gulp": "github:DefinitelyTyped/DefinitelyTyped/gulp/gulp.d.ts#052725d74978d6b8d7c4ff537b5a3b21ee755a49",
+    "gulp-typescript": "github:DefinitelyTyped/DefinitelyTyped/gulp-typescript/gulp-typescript.d.ts#960fd659b456e2fb5d23c52794ffdc56b09796cf",
+    "jquery": "registry:dt/jquery#1.10.0+20160316155526",
+    "merge2": "github:DefinitelyTyped/DefinitelyTyped/merge2/merge2.d.ts#1034cc35525f804a2e9102f85e6efe4e5af317ad",
+    "mime": "github:DefinitelyTyped/DefinitelyTyped/mime/mime.d.ts#cb5206a8ac1c9a3ddfd126f5ecea6729b2361452",
+    "node": "github:DefinitelyTyped/DefinitelyTyped/node/node.d.ts#aee0039a2d6686ec78352125010ebb38a7a7d743",
+    "orchestrator": "github:DefinitelyTyped/DefinitelyTyped/orchestrator/orchestrator.d.ts#422b006d39dd37fc667ce5464967ee3ff6135092",
+    "serve-static": "github:DefinitelyTyped/DefinitelyTyped/serve-static/serve-static.d.ts#0fa4e9e61385646ea6a4cba2aef357353d2ce77f",
+    "socket.io": "registry:dt/socket.io#1.4.4+20160317120654",
+    "socket.io-client": "registry:dt/socket.io-client#1.4.4+20160317120654",
+    "source-map": "github:DefinitelyTyped/DefinitelyTyped/source-map/source-map.d.ts#1c572762b93d4b059d89339867edf54946176361",
+    "uglify-js": "github:DefinitelyTyped/DefinitelyTyped/uglify-js/uglify-js.d.ts#51b587292f2ba85d68939d9c59cf7fa745a6173e",
+    "webpack": "github:DefinitelyTyped/DefinitelyTyped/webpack/webpack.d.ts#51868917c7480cc6b1187a59bbd0120effa29841"
+  }
+}
