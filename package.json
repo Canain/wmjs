@@ -1,7 +1,7 @@
 {
-  "name": "webpack-express",
+  "name": "wmjs",
   "version": "1.0.0",
-  "description": "Webpack Express Template",
+  "description": "Watermark Generator",
   "main": "app.js",
   "scripts": {
     "postinstall": "bower install && typings install",

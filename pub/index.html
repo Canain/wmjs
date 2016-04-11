@@ -1,6 +1,6 @@
 <html lang="en">
 	<head>
-		<title>Webpack Express</title>
+		<title>WMJS</title>
 		<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
 		<link rel="stylesheet" href="lib/angular-material/angular-material.min.css">
 		<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
@@ -10,9 +10,12 @@
 		<script src="lib/angular-material/angular-material.min.js"></script>
 		<script src="bundle.js"></script>
 	</head>
-	<body ng-app="WebpackExpress" ng-controller="MainCtrl as ctrl" ng-cloak>
-		<md-content>
-			<md-button class="md-raised">{{ctrl.content}}</md-button>
+	<body ng-app="WMJS" ng-controller="MainCtrl as ctrl" ng-cloak>
+		<md-content layout="row" layout-align="center start" layout-fill>
+			<canvas id="wm-original"></canvas>
+			<canvas id="wm-imprint"></canvas>
+			<canvas id="wm-processed"></canvas>
+			<canvas id="wm-retrieved"></canvas>
 		</md-content>
 	</body>
 </html>

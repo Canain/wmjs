@@ -1,6 +1,6 @@
 {
-  "name": "webpack-express",
-  "description": "Webpack Express Template",
+  "name": "wmjs",
+  "description": "Watermark Generator",
   "main": "pub/index.html",
   "authors": [
     "Shuyang Chen <sc1085@gmail.com>"

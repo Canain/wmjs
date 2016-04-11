@@ -17,14 +17,27 @@ require("!style!css!sass!../../sass/style.scss");
 // 	});
 // });
 
+interface Canvas {
+	canvas: HTMLCanvasElement;
+	context: CanvasRenderingContext2D;
+}
+
 class MainCtrl {
 	
-	content: string;
+	original: Canvas;
 	
-	constructor(public $timeout: angular.ITimeoutService) {
-		this.content = 'Angular Loaded';
+	constructor(public $mdDialog: angular.material.IDialogService, public $timeout: angular.ITimeoutService) {
+		this.original = this.getCanvas('wm-original');
+	}
+	
+	getCanvas(id: string): Canvas {
+		const canvas = <HTMLCanvasElement>document.getElementById(id);
+		return {
+			canvas: canvas,
+			context: canvas.getContext('2d')
+		};
 	}
 }
 
-angular.module('WebpackExpress', ['ngMaterial'])
+angular.module('WMJS', ['ngMaterial'])
 	.controller('MainCtrl', ['$mdDialog', '$timeout', MainCtrl]);
